@@ -1349,10 +1349,15 @@ static int get_preset_file_2(const char *preset_name, const char *codec_name, AV
 {
     int i, ret = -1;
     char filename[1000];
+#ifdef __MORPHOS__
+    const char *base[1] = { "PROGDIR:presets",
+                            };
+#else
     const char *base[3] = { getenv("AVCONV_DATADIR"),
                             getenv("HOME"),
                             AVCONV_DATADIR,
                             };
+#endif
 
     for (i = 0; i < FF_ARRAY_ELEMS(base) && ret < 0; i++) {
         if (!base[i])

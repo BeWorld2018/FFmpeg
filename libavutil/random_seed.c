@@ -120,7 +120,26 @@ static uint32_t get_generic_seed(void)
 uint32_t av_get_random_seed(void)
 {
     uint32_t seed;
-
+/*#ifdef __MORPHOS__
+    #define __NOLIBBASE__ 1
+    #include <exec/system.h>
+    #include <proto/exec.h>
+    #include <proto/random.h>
+    extern struct Library *RandomBase;
+    RandomBase = OpenLibrary("random.library", 0);
+    if (RandomBase)
+    {
+        seed = Random();
+        CloseLibrary(RandomBase);
+    }
+    else
+    {
+        UQUAD val;
+        NewGetSystemAttrsA(&val, sizeof(val), SYSTEMINFOTYPE_UPTIMETICKS, TAG_DONE);
+        seed = val & 0xffffffff;
+    }
+    return seed;
+#else*/
 #if HAVE_BCRYPT
     BCRYPT_ALG_HANDLE algo_handle;
     NTSTATUS ret = BCryptOpenAlgorithmProvider(&algo_handle, BCRYPT_RNG_ALGORITHM,
@@ -137,9 +156,12 @@ uint32_t av_get_random_seed(void)
     return arc4random();
 #endif
 
+#ifndef __MORPHOS__
     if (read_random(&seed, "/dev/urandom") == sizeof(seed))
         return seed;
     if (read_random(&seed, "/dev/random")  == sizeof(seed))
         return seed;
+#endif
     return get_generic_seed();
+//#endif
 }

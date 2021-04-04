@@ -31,6 +31,10 @@
 #include "avutil.h"
 #include "log.h"
 
+#ifdef __MORPHOS__
+#define av_assert0(cond) do { if (!(cond)) abort(); } while (0)
+#else
+
 /**
  * assert() equivalent, that is always enabled.
  */

@@ -35,6 +35,9 @@
 #include <exec/exec.h>
 #include <interfaces/exec.h>
 #include <proto/exec.h>
+#elif defined(__MORPHOS__)
+#include <exec/system.h>
+#include <proto/exec.h>
 #endif /* __APPLE__ */
 
 #include "libavutil/avassert.h"
@@ -48,6 +51,11 @@
 int ff_get_cpu_flags_ppc(void)
 {
 #if HAVE_ALTIVEC
+#if defined(__MORPHOS__)
+    ULONG AltiVecIsEnabled = 0;
+    if (!NewGetSystemAttrs(&AltiVecIsEnabled, sizeof(AltiVecIsEnabled), SYSTEMINFOTYPE_PPC_ALTIVEC, TAG_DONE))
+        AltiVecIsEnabled = 0;
+    return AltiVecIsEnabled ? AV_CPU_FLAG_ALTIVEC : 0;
 #ifdef __AMIGAOS4__
     ULONG result = 0;
     extern struct ExecIFace *IExec;

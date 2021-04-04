@@ -55,6 +55,13 @@
 
 #include "libavutil/thread.h"
 
+#ifdef __MORPHOS__
+#include "libavutil/ffversion.h"
+unsigned long __stack = 1000000;
+static const char *version __attribute__((used)) = "$VER: ffprobe " FFMPEG_VERSION "";
+#endif
+
+
 #if !HAVE_THREADS
 #  ifdef pthread_mutex_lock
 #    undef pthread_mutex_lock

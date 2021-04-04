@@ -99,6 +99,12 @@
 #include <conio.h>
 #endif
 
+#ifdef __MORPHOS__
+#include "libavutil/ffversion.h"
+unsigned long __stack = 1000000;
+static const char *version __attribute__((used)) = "$VER: ffmpeg " FFMPEG_VERSION "";
+#endif
+
 #include <time.h>
 
 #include "ffmpeg.h"

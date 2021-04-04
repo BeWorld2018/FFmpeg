@@ -159,6 +159,46 @@ static inline int strict_pthread_once(pthread_once_t *once_control, void (*init_
 
 #define ff_thread_once(control, routine) pthread_once(control, routine)
 
+
+#elif defined(__MORPHOS__)
+
+#include <hardware/atomic.h>
+#include <exec/semaphores.h>
+#include <proto/exec.h>
+#include <string.h>
+
+struct ff_morphos_mutex {
+	struct SignalSemaphore sem;
+};
+#define AVMutex struct ff_morphos_mutex
+#define AV_MUTEX_INITIALIZER {{{NULL,NULL,NT_SIGNALSEM,0,NULL},0,{NULL,NULL,NULL},{{NULL,NULL},NULL},NULL,-1}}
+
+static inline int ff_mutex_init(AVMutex *mutex, const void *attr) { memset(mutex, 0, sizeof(*mutex)); InitSemaphore(&mutex->sem); return 0; }
+static inline int ff_mutex_lock(AVMutex *mutex)
+{
+	Forbid(); /* A bit ugly, but oh well... */
+	if (mutex->sem.ss_WaitQueue.mlh_Head == NULL) {
+		mutex->sem.ss_WaitQueue.mlh_Head = (struct MinNode *) &mutex->sem.ss_WaitQueue.mlh_Tail;
+		mutex->sem.ss_WaitQueue.mlh_TailPred = (struct MinNode *) &mutex->sem.ss_WaitQueue.mlh_Head;
+	}
+	Permit();
+	ObtainSemaphore(&mutex->sem);
+	return 0;
+}
+static inline int ff_mutex_unlock(AVMutex *mutex) { ReleaseSemaphore(&mutex->sem); return 0; }
+static inline int ff_mutex_destroy(AVMutex *mutex) { return 0; }
+
+#define AVOnce LONG
+#define AV_ONCE_INIT 0
+
+static inline int ff_thread_once(AVOnce *control, void (*routine)(void))
+{
+	if (ATOMIC_STORE(control, 1) == 0) {
+		routine();
+	}
+	return 0;
+}
+
 #else
 
 #define AVMutex char

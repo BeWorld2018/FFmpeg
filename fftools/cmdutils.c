@@ -2049,9 +2049,14 @@ FILE *get_preset_file(char *filename, size_t filename_size,
 {
     FILE *f = NULL;
     int i;
+#ifdef __MORPHOS__	
+    const char *base[1] = { "PROGDIR:presets",
+                            };
+#else
     const char *base[3] = { getenv("FFMPEG_DATADIR"),
                             getenv("HOME"),
                             FFMPEG_DATADIR, };
+#endif
 
     if (is_path) {
         av_strlcpy(filename, preset_name, filename_size);
@@ -2074,7 +2079,11 @@ FILE *get_preset_file(char *filename, size_t filename_size,
             }
         }
 #endif
+#ifdef __MORPHOS__	
+		for (i = 0; i < 1 && !f; i++) {
+#else
         for (i = 0; i < 3 && !f; i++) {
+#endif
             if (!base[i])
                 continue;
             snprintf(filename, filename_size, "%s%s/%s.ffpreset", base[i],
