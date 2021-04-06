@@ -56,7 +56,7 @@ int ff_get_cpu_flags_ppc(void)
     if (!NewGetSystemAttrs(&AltiVecIsEnabled, sizeof(AltiVecIsEnabled), SYSTEMINFOTYPE_PPC_ALTIVEC, TAG_DONE))
         AltiVecIsEnabled = 0;
     return AltiVecIsEnabled ? AV_CPU_FLAG_ALTIVEC : 0;
-#ifdef __AMIGAOS4__
+#elif defined(__AMIGAOS4__)
     ULONG result = 0;
     extern struct ExecIFace *IExec;
 

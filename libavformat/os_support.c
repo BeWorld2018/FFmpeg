@@ -41,6 +41,10 @@
 #endif /* HAVE_WINSOCK2_H */
 #endif /* !HAVE_POLL_H */
 
+#ifdef __MORPHOS__
+#include <sys/filio.h>
+#endif
+
 #include "network.h"
 
 #if !HAVE_GETADDRINFO
@@ -214,6 +218,9 @@ int ff_socket_nonblock(int socket, int enable)
 #if HAVE_WINSOCK2_H
     u_long param = enable;
     return ioctlsocket(socket, FIONBIO, &param);
+#elif __MORPHOS__
+	char on = (char) enable;
+	return MyIoctlSocket(socket, FIONBIO, (char *)&on);
 #else
     if (enable)
         return fcntl(socket, F_SETFL, fcntl(socket, F_GETFL) | O_NONBLOCK);

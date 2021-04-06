@@ -55,9 +55,12 @@
 #endif
 
 #ifdef __MORPHOS__
+#include <exec/types.h>
 #include "libavutil/ffversion.h"
 unsigned long __stack = 1000000;
 static const char *version __attribute__((used)) = "$VER: ffplay " FFMPEG_VERSION "";
+struct Library *ffmpegSocketBase;
+#define pixel pixelSDL2
 #endif
 
 #include <SDL.h>

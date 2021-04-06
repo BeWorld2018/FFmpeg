@@ -30,6 +30,7 @@
 #include "config.h"
 
 #include <sys/stat.h>
+#include <string.h>
 
 #ifdef _WIN32
 #if HAVE_DIRECT_H

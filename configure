@@ -6247,9 +6247,9 @@ if ! disabled pthreads && ! enabled w32threads && ! enabled os2threads; then
 fi
 
 enabled  zlib && { check_pkg_config zlib zlib "zlib.h" zlibVersion ||
-                   check_lib zlib   zlib.h      zlibVersion    -lz; }
-enabled bzlib && check_lib bzlib bzlib.h BZ2_bzlibVersion    -lbz2
-enabled  lzma && check_lib lzma   lzma.h lzma_version_number -llzma
+                   check_lib zlib   zlib.h      zlibVersion    -lz_shared -D__MORPHOS_SHAREDLIBS  -noixemul; }
+enabled bzlib && check_lib bzlib bzlib.h BZ2_bzlibVersion    -lbz2 -L/usr/local/lib -noixemul
+enabled  lzma && check_lib lzma   lzma.h lzma_version_number -D__MORPHOS_SHAREDLIBS -L/usr/local/lib -noixemul
 
 # On some systems dynamic loading requires no extra linker flags
 check_lib libdl dlfcn.h "dlopen dlsym" || check_lib libdl dlfcn.h "dlopen dlsym" -ldl
@@ -6331,7 +6331,7 @@ if enabled libmfx; then
 fi
 
 enabled libmodplug        && require_pkg_config libmodplug libmodplug libmodplug/modplug.h ModPlug_Load
-enabled libmp3lame        && require "libmp3lame >= 3.98.3" lame/lame.h lame_set_VBR_quality -lmp3lame $libm_extralibs
+enabled libmp3lame        && require "libmp3lame >= 3.98.3" lame/lame.h lame_set_VBR_quality -lmp3lame -L/usr/local/lib -noixemul $libm_extralibs
 enabled libmysofa         && { check_pkg_config libmysofa libmysofa mysofa.h mysofa_neighborhood_init_withstepdefine ||
                                require libmysofa mysofa.h mysofa_neighborhood_init_withstepdefine -lmysofa $zlib_extralibs; }
 enabled libnpp            && { check_lib libnpp npp.h nppGetLibVersion -lnppig -lnppicc -lnppc -lnppidei ||

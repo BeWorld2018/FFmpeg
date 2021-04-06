@@ -35,6 +35,10 @@
 
 #include <zlib.h>
 
+#ifdef __MORPHOS__
+#define Node _Node
+#endif
+
 typedef struct MVHAContext {
     GetBitContext     gb;
     int nb_symbols;

@@ -100,9 +100,11 @@
 #endif
 
 #ifdef __MORPHOS__
+#include <exec/types.h>
 #include "libavutil/ffversion.h"
 unsigned long __stack = 1000000;
 static const char *version __attribute__((used)) = "$VER: ffmpeg " FFMPEG_VERSION "";
+struct Library *ffmpegSocketBase;
 #endif
 
 #include <time.h>
