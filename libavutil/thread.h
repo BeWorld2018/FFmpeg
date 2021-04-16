@@ -161,7 +161,9 @@ static inline int strict_pthread_once(pthread_once_t *once_control, void (*init_
 
 
 #elif defined(__MORPHOS__)
-
+#if HAVE_ALTIVEC
+#include <altivec.h>
+#endif
 #include <hardware/atomic.h>
 #include <exec/semaphores.h>
 #include <proto/exec.h>

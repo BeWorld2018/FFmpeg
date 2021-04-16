@@ -32,6 +32,9 @@
 #include "avcodec.h"
 #include "internal.h"
 
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
 #include <zlib.h>
 
 /* Frame header flags */

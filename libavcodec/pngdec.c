@@ -37,6 +37,10 @@
 #include "pngdsp.h"
 #include "thread.h"
 
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#undef  pixel
+#endif
 #include <zlib.h>
 
 enum PNGHeaderState {

@@ -25,6 +25,11 @@
  */
 
 #include "config.h"
+
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
+
 #if CONFIG_ZLIB
 #include <zlib.h>
 #endif

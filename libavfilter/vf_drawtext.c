@@ -35,6 +35,9 @@
 #include <sys/stat.h>
 #include <time.h>
 #if HAVE_UNISTD_H
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
 #include <unistd.h>
 #endif
 #include <fenv.h>

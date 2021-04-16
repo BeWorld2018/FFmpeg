@@ -37,6 +37,9 @@
 #include <proto/exec.h>
 #elif defined(__MORPHOS__)
 #include <exec/system.h>
+#if HAVE_ALTIVEC
+#include <altivec.h>
+#endif
 #include <proto/exec.h>
 #endif /* __APPLE__ */
 

@@ -33,11 +33,16 @@
  * exr_half2float() is credited to Aaftab Munshi, Dan Ginsburg, Dave Shreiner.
  */
 
+#include "libavutil/common.h"
+
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#undef pixel
+#endif
 #include <float.h>
 #include <zlib.h>
 
 #include "libavutil/avassert.h"
-#include "libavutil/common.h"
 #include "libavutil/imgutils.h"
 #include "libavutil/intfloat.h"
 #include "libavutil/avstring.h"

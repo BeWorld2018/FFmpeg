@@ -34,13 +34,17 @@
  */
 
 #include <stdint.h>
-#include <zlib.h>
 
 #include "libavutil/imgutils.h"
 
 #include "avcodec.h"
 #include "bytestream.h"
 #include "internal.h"
+
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
+#include <zlib.h>
 
 #define BITMAPINFOHEADER_SIZE 0x28
 #define TDSF_HEADER_SIZE      0x56

@@ -35,7 +35,6 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <zlib.h>
 
 #include "libavutil/imgutils.h"
 #include "libavutil/internal.h"
@@ -43,6 +42,11 @@
 
 #include "avcodec.h"
 #include "internal.h"
+
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
+#include <zlib.h>
 
 typedef struct ScreenpressoContext {
     AVFrame *current;

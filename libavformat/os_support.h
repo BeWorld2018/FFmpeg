@@ -29,6 +29,10 @@
 
 #include "config.h"
 
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
+
 #include <sys/stat.h>
 #include <string.h>
 

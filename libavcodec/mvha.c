@@ -33,6 +33,10 @@
 #include "internal.h"
 #include "lossless_videodsp.h"
 
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
+
 #include <zlib.h>
 
 #ifdef __MORPHOS__

@@ -44,6 +44,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "libavutil/common.h"
+
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#undef pixel
+#endif
 #include <zlib.h>
 
 #include "libavutil/imgutils.h"

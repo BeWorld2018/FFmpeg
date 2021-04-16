@@ -26,6 +26,9 @@
 #include "libavutil/common.h"
 
 #if CONFIG_ZLIB
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
 #include <zlib.h>
 #endif
 #include "libavutil/lzo.h"

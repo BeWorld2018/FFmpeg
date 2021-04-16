@@ -47,6 +47,9 @@
 #include "libavutil/internal.h"
 #include "libavutil/mem.h"
 
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
 #include <zlib.h>
 
 typedef struct LclEncContext {

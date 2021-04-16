@@ -41,6 +41,10 @@
 #include "internal.h"
 #include "msrledec.h"
 
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
+
 #include <zlib.h>
 
 typedef struct TsccContext {

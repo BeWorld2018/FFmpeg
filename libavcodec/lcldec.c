@@ -49,6 +49,9 @@
 #include "thread.h"
 
 #if CONFIG_ZLIB_DECODER
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
 #include <zlib.h>
 #endif
 

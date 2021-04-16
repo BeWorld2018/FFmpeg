@@ -24,6 +24,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #if HAVE_UNISTD_H
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#endif
 #include <unistd.h>
 #endif
 #if HAVE_IO_H

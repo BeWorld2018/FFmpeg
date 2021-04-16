@@ -33,6 +33,10 @@
 #include "libavutil/color_utils.h"
 #include "libavutil/stereo3d.h"
 
+#if defined(__MORPHOS__) && defined(HAVE_ALTIVEC)
+#include <altivec.h>
+#undef  pixel
+#endif
 #include <zlib.h>
 
 #define IOBUF_SIZE 4096

@@ -55,6 +55,10 @@
 #endif
 
 #ifdef __MORPHOS__
+#if defined(HAVE_ALTIVEC)
+#include <altivec.h>
+//#undef pixel
+#endif
 #include <exec/types.h>
 #include "libavutil/ffversion.h"
 unsigned long __stack = 1000000;
