@@ -21,14 +21,14 @@ CC_IDENT=gcc 10.2.0 (GCC/MorphOS)
 ARCH=ppc
 INTRINSICS=none
 EXTERN_PREFIX=
-CC=ppc-morphos-gcc-10
+CC=ppc-morphos-gcc-10 -noixemul
 CXX=g++
-AS=ppc-morphos-gcc-10
-OBJCC=ppc-morphos-gcc-10
-LD=ppc-morphos-gcc-10
-DEPCC=ppc-morphos-gcc-10
+AS=ppc-morphos-gcc-10 -noixemul
+OBJCC=ppc-morphos-gcc-10 -noixemul
+LD=ppc-morphos-gcc-10 -N -noixemul
+DEPCC=ppc-morphos-gcc-10 -noixemul
 DEPCCFLAGS= $(CPPFLAGS)
-DEPAS=ppc-morphos-gcc-10
+DEPAS=ppc-morphos-gcc-10 -noixemul
 DEPASFLAGS= $(CPPFLAGS)
 X86ASM=nasm
 DEPX86ASM=nasm
@@ -38,14 +38,15 @@ ARFLAGS=rcD
 AR_O=$@
 AR_CMD=ar
 NM_CMD=nm -g
-RANLIB=ranlib -D
+RANLIB=ppc-morphos-gcc-ranlib-10
+#-D
 STRIP=ppc-morphos-strip
 STRIPTYPE=direct
 NVCC=clang
 CP=cp -p
 LN_S=ln -s -f
 CPPFLAGS= -D_ISOC99_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DZLIB_CONST
-CFLAGS=  -noixemul -maltivec -mabi=altivec -D__MORPHOS_SHAREDLIBS -std=c11 -fomit-frame-pointer -I/usr/local/include/opus -I/usr/local/include -Wdeclaration-after-statement -Wall -Wdisabled-optimization -Wpointer-arith -Wredundant-decls -Wwrite-strings -Wtype-limits -Wundef -Wmissing-prototypes -Wno-pointer-to-int-cast -Wstrict-prototypes -Wempty-body -Wno-parentheses -Wno-switch -Wno-format-zero-length -Wno-pointer-sign -Wno-unused-const-variable -Wno-bool-operation -Wno-char-subscripts -O3 -fno-math-errno -fno-signed-zeros -fno-tree-vectorize -Werror=format-security -Werror=implicit-function-declaration -Werror=missing-prototypes -Werror=return-type -Werror=vla -Wformat -fdiagnostics-color=auto -Wno-maybe-uninitialized -I/usr/local/include/SDL2
+CFLAGS= -O2 -noixemul -maltivec -mabi=altivec -D__MORPHOS_SHAREDLIBS -std=c11 -fomit-frame-pointer -I/usr/local/include/opus -I/usr/local/include -Wdeclaration-after-statement -Wall -Wdisabled-optimization -Wpointer-arith -Wredundant-decls -Wwrite-strings -Wtype-limits -Wundef -Wmissing-prototypes -Wno-pointer-to-int-cast -Wstrict-prototypes -Wempty-body -Wno-parentheses -Wno-switch -Wno-format-zero-length -Wno-pointer-sign -Wno-unused-const-variable -Wno-bool-operation -Wno-char-subscripts -fno-math-errno -fno-signed-zeros -fno-tree-vectorize -Werror=format-security -Werror=implicit-function-declaration -Werror=missing-prototypes -Werror=return-type -Werror=vla -Wformat -fdiagnostics-color=auto -Wno-maybe-uninitialized -I/usr/local/include/SDL2
 CXXFLAGS=  -D__STDC_CONSTANT_MACROS -std=c++11
 OBJCFLAGS=  
 ASFLAGS=  -noixemul

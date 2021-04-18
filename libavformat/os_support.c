@@ -277,12 +277,20 @@ int ff_poll(struct pollfd *fds, nfds_t numfds, int timeout)
         return 0;
 
     if (timeout < 0) {
+		#ifdef __MORPHOS__
+		 rc = myselect(n, &read_set, &write_set, &exception_set, NULL);
+		#else
         rc = select(n, &read_set, &write_set, &exception_set, NULL);
+		#endif
     } else {
         struct timeval tv;
         tv.tv_sec  = timeout / 1000;
         tv.tv_usec = 1000 * (timeout % 1000);
+		#ifdef __MORPHOS__
+		rc         = myselect(n, &read_set, &write_set, &exception_set, &tv);
+		#else
         rc         = select(n, &read_set, &write_set, &exception_set, &tv);
+		#endif
     }
 
     if (rc < 0)
