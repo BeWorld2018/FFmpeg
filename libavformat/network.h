@@ -21,6 +21,12 @@
 #ifndef AVFORMAT_NETWORK_H
 #define AVFORMAT_NETWORK_H
 
+#ifdef __MORPHOS__
+#undef SOCKET_BASE_NAME
+#define SOCKET_BASE_NAME ffmpegSocketBase
+extern struct Library *ffmpegSocketBase;
+#endif
+
 #include <errno.h>
 #include <stdint.h>
 
@@ -75,6 +81,80 @@ int ff_neterrno(void);
 #if HAVE_POLL_H
 #include <poll.h>
 #endif
+
+
+#ifdef __MORPHOS__
+#include <proto/exec.h>
+#include <stdarg.h>
+/*#define socket socketMOS
+#define bind bindMOS
+#define listen listenMOS
+#define accept acceptMOS
+#define connect connectMOS
+#define send sendMOS
+#define sendto sendtoMOS
+#define sendmsg sendmsgMOS
+#define recv recvMOS
+#define recvfrom recvfromMOS
+#define recvmsg recvmsgMOS
+#define shutdown shutdownMOS
+#define setsockopt setsockoptMOS
+#define getsockopt getsockoptMOS
+#define setsockname setsocknameMOS
+#define getpeername getpeernameMOS
+#define gethostname gethostnameMOS
+#define getnetbyaddr getnetbyaddrMOS
+#define getservbyport getservbyportMOS
+#define getservbyname getservbynameMOS
+#define getservbyaddr getservbyaddrMOS
+#define getprotobyname getprotobynameMOS
+#define getprotobynumber getprotobynumberMOS
+#define gethostbyname gethostbynameMOS
+#define gethostbyaddr gethostbyaddrMOS
+#define getnetbyname getnetbynameMOS
+#define inet_addr inet_addrMOS
+#define inet_network inet_networkMOS
+#define gethostid gethostidMOS
+#define getdtablesize getdtablesizeMOS
+#define getsockname getsocknameMOS*/
+#include <proto/socket.h>
+#include <amitcp/socketbasetags.h>
+#include <clib/debug_protos.h>
+
+
+#define MySocketBaseTagList(__p0) \
+        LP1(294, LONG , SocketBaseTagList, \
+                struct TagItem *, __p0, a0, \
+                , ffmpegSocketBase, 0, 0, 0, 0, 0, 0)
+
+#define MySocketBaseTags(...) \
+        ({ULONG _tags[] = { __VA_ARGS__ }; \
+        MySocketBaseTagList((struct TagItem *)_tags);})
+
+#define MyWaitSelect(__p0, __p1, __p2, __p3, __p4, __p5) \
+        LP6(126, LONG , WaitSelect, \
+                LONG , __p0, d0, \
+                fd_set *, __p1, a0, \
+                fd_set *, __p2, a1, \
+                fd_set *, __p3, a2, \
+                struct timeval *, __p4, a3, \
+                ULONG *, __p5, d1, \
+                , ffmpegSocketBase, 0, 0, 0, 0, 0, 0)
+
+#define MyIoctlSocket(__p0, __p1, __p2) \
+	LP3(114, LONG , IoctlSocket, \
+		LONG , __p0, d0, \
+		ULONG , __p1, d1, \
+		char *, __p2, a0, \
+		, ffmpegSocketBase, 0, 0, 0, 0, 0, 0)
+
+/*static int myselect(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exeptfds,
+     struct timeval *timeout)
+{
+  return MyWaitSelect(nfds, readfds, writefds, exeptfds, timeout, NULL);
+}*/
+#endif
+
 
 int ff_socket_nonblock(int socket, int enable);
 

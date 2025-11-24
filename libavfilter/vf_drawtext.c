@@ -74,6 +74,9 @@
 #include FT_GLYPH_H
 #include FT_STROKER_H
 
+#ifdef __MORPHOS__
+#define __MORPHOS_SHAREDLIBS
+#endif
 #include <hb.h>
 #include <hb-ft.h>
 

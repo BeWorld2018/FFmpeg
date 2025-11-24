@@ -40,6 +40,10 @@
 #endif /* HAVE_SYS_SELECT_H */
 #endif /* !HAVE_POLL_H */
 
+#ifdef __MORPHOS__
+#include <sys/filio.h>
+#endif
+
 #include "network.h"
 
 #if !HAVE_GETADDRINFO

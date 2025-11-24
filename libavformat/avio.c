@@ -338,6 +338,22 @@ static const struct URLProtocol *url_find_protocol(const char *filename)
             return up;
         }
     }
+#ifdef __MORPHOS__
+    strcpy(proto_str, "file");
+    for (i = 0; protocols[i]; i++) {
+            const URLProtocol *up = protocols[i];
+        if (!strcmp(proto_str, up->name)) {
+            av_freep(&protocols);
+            return up;
+        }
+        if (up->flags & URL_PROTOCOL_FLAG_NESTED_SCHEME &&
+            !strcmp(proto_nested, up->name)) {
+            av_freep(&protocols);
+            return up;
+        }
+    }
+#endif
+
     av_freep(&protocols);
     if (av_strstart(filename, "https:", NULL) || av_strstart(filename, "tls:", NULL) ||
         av_strstart(filename, "dtls:", NULL))

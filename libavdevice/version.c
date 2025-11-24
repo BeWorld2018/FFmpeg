@@ -22,6 +22,12 @@
 
 #include "config.h"
 
+#ifdef __MORPHOS__
+#ifndef static_assert
+#define static_assert _Static_assert
+#endif
+#endif
+
 #include "avdevice.h"
 #include "version.h"
 

@@ -932,10 +932,13 @@ FILE *get_preset_file(char *filename, size_t filename_size,
 #endif
     char *env_home = getenv_utf8("HOME");
     char *env_ffmpeg_datadir = getenv_utf8("FFMPEG_DATADIR");
+#ifdef __MORPHOS__
+	const char *base[1] = { "PROGDIR:ffpresets", };
+#else
     const char *base[3] = { env_ffmpeg_datadir,
                             env_home,   /* index=1(HOME) is special: search in a .ffmpeg subfolder */
                             FFMPEG_DATADIR, };
-
+#endif
     if (is_path) {
         av_strlcpy(filename, preset_name, filename_size);
         f = fopen_utf8(filename, "r");
@@ -969,7 +972,11 @@ FILE *get_preset_file(char *filename, size_t filename_size,
             }
         }
 #endif
+#ifdef __MORPHOS__
+		for (i = 0; i < 1 && !f; i++) {
+#else
         for (i = 0; i < 3 && !f; i++) {
+#endif
             if (!base[i])
                 continue;
             snprintf(filename, filename_size, "%s%s/%s.ffpreset", base[i],

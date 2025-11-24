@@ -189,7 +189,12 @@ static int alloc_picture(H264Context *h, H264Picture *pic)
 {
     int i, ret = 0;
 
+#ifdef __MORPHOS__
+    if (!h || !pic || !pic->f || pic->f->data[0])
+        goto fail;
+#else
     av_assert0(!pic->f->data[0]);
+#endif
 
     if (h->sei.common.lcevc.info) {
         HEVCSEILCEVC *lcevc = &h->sei.common.lcevc;
@@ -2571,9 +2576,9 @@ static int decode_slice(struct AVCodecContext *avctx, void *arg)
         return ret;
 
     sl->mb_skip_run = -1;
-
+#ifndef __MORPHOS__
     av_assert0(h->block_offset[15] == (4 * ((scan8[15] - scan8[0]) & 7) << h->pixel_shift) + 4 * sl->linesize * ((scan8[15] - scan8[0]) >> 3));
-
+#endif
     if (h->postpone_filter)
         sl->deblocking_filter = 0;
 
@@ -2780,7 +2785,12 @@ int ff_h264_execute_decode_slices(H264Context *h)
     if (h->avctx->hwaccel || context_count < 1)
         return 0;
 
+#ifdef __MORPHOS__
+    if (!(context_count && h->slice_ctx[context_count - 1].mb_y < h->mb_height))
+       return 0;
+#else
     av_assert0(context_count && h->slice_ctx[context_count - 1].mb_y < h->mb_height);
+#endif
 
     if (context_count == 1) {
 

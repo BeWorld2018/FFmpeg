@@ -74,6 +74,13 @@ typedef struct FrameData {
     int64_t pkt_pos;
     int     pkt_size;
 } FrameData;
+#ifdef __MORPHOS__
+#include <exec/types.h>
+#include "libavutil/ffversion.h"
+unsigned long __stack = 1000000;
+static const char *version __attribute__((used)) = "$VER: ffprobe " FFMPEG_VERSION "";
+struct Library *ffmpegSocketBase;
+#endif
 
 typedef struct InputStream {
     AVStream *st;

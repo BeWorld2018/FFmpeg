@@ -464,7 +464,14 @@ static inline int decode_simple_internal(AVCodecContext *avctx, AVFrame *frame, 
         consumed = pkt->size;
 
     if (!ret)
+#ifdef __MORPHOS__
+	{
+		if (!frame->buf[0])
+			return AVERROR(EINVAL);
+	}
+#else	
         av_assert0(frame->buf[0]);
+#endif
     if (ret == AVERROR(EAGAIN))
         ret = 0;
 
@@ -609,7 +616,12 @@ int ff_decode_receive_frame_internal(AVCodecContext *avctx, AVFrame *frame)
     const FFCodec *const codec = ffcodec(avctx->codec);
     int ret;
 
+#ifdef __MORPHOS__
+    if (frame->buf[0])
+		return AVERROR(EINVAL);
+#else
     av_assert0(!frame->buf[0]);
+#endif
 
     if (codec->cb_type == FF_CODEC_CB_TYPE_RECEIVE_FRAME) {
         while (1) {

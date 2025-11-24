@@ -625,7 +625,11 @@ skip_mean_and_median:
 
                 best_pred = 0;
                 best_score = 256 * 256 * 256 * 64;
+#ifdef __MORPHOS__
+				for (j = 0; j < pred_count && s->cur_pic.f; j++) {
+#else
                 for (j = 0; j < pred_count; j++) {
+#endif
                     int *linesize = s->cur_pic.f->linesize;
                     int score = 0;
                     uint8_t *src = s->cur_pic.f->data[0] +

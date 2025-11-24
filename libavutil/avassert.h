@@ -38,6 +38,9 @@
 /**
  * assert() equivalent, that is always enabled.
  */
+#ifdef __MORPHOS__
+#define av_assert0(cond) do { if (!(cond)) abort(); } while (0)
+#else
 #define av_assert0(cond) do {                                           \
     if (!(cond)) {                                                      \
         av_log(NULL, AV_LOG_PANIC, "Assertion %s failed at %s:%d\n",    \
@@ -45,7 +48,7 @@
         abort();                                                        \
     }                                                                   \
 } while (0)
-
+#endif
 
 /**
  * assert() equivalent, that does not lie in speed critical code.

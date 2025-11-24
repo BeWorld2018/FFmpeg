@@ -25,6 +25,10 @@
  */
 
 #include "config.h"
+#ifdef __MORPHOS__
+#define __MORPHOS_SHAREDLIBS
+#endif
+
 #if CONFIG_ZLIB
 #include <zlib.h>
 #endif

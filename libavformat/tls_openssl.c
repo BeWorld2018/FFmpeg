@@ -840,12 +840,15 @@ static int dtls_start(URLContext *h, const char *url, int flags, AVDictionary **
         SSL_CTX_set_verify(p->ctx, SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
 
     /* Setup the SRTP context */
+#ifndef __MORPHOS__
+	// ????
     if (SSL_CTX_set_tlsext_use_srtp(p->ctx, profiles)) {
         av_log(p, AV_LOG_ERROR, "Init SSL_CTX_set_tlsext_use_srtp failed, profiles=%s, %s\n",
             profiles, openssl_get_error(p));
         ret = AVERROR(EINVAL);
         return ret;
     }
+#endif
 
     /* The ssl should not be created unless the ctx has been initialized. */
     p->ssl = SSL_new(p->ctx);

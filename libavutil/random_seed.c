@@ -177,7 +177,11 @@ int av_random_bytes(uint8_t* buf, size_t len)
     return 0;
 #endif
 
+#ifdef __MORPHOS__
+    err = read_random(buf, len, "RANDOM:");
+#else
     err = read_random(buf, len, "/dev/urandom");
+#endif
     if (!err)
         return err;
 

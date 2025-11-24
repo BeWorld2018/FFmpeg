@@ -21,7 +21,11 @@
  */
 
 #include <assert.h>
-
+#ifdef __MORPHOS__
+#ifndef static_assert
+#define static_assert _Static_assert
+#endif
+#endif
 #include "libavutil/avstring.h"
 #include "internal.h"
 #include "img2.h"

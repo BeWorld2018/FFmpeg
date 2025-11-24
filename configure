@@ -4174,8 +4174,8 @@ mandir_default='${prefix}/share/man'
 # toolchain
 ar_default="ar"
 cc_default="gcc"
-stdc_default="c17"
-stdcxx_default="c++11"
+stdc_default="gnu17"
+stdcxx_default="gnu++11"
 cxx_default="g++"
 host_cc_default="gcc"
 doxygen_default="doxygen"
@@ -5748,7 +5748,8 @@ check_cxxflags_cc -std=$stdcxx ctype.h "__cplusplus >= 201103L" ||
 # some compilers silently accept -std=c11, so we also need to check that the
 # version macro is defined properly
 check_cflags_cc -std=$stdc ctype.h "__STDC_VERSION__ >= 201112L" ||
-    { check_cflags_cc -std=c11 ctype.h "__STDC_VERSION__ >= 201112L" && stdc="c11" || die "Compiler lacks C11 support"; }
+    { check_cflags_cc -std=gnu11 ctype.h "__STDC_VERSION__ >= 201112L" && stdc="c11" || die "Compiler lacks C11 support"; }
+
 
 test_cc <<EOF || die "Compiler lacks support for C11 static assertions"
 #include <assert.h>
@@ -5768,7 +5769,7 @@ check_cppflags -D_LARGEFILE_SOURCE
 
 add_host_cppflags -D_ISOC11_SOURCE
 check_host_cflags_cc -std=$stdc ctype.h "__STDC_VERSION__ >= 201112L" ||
-    check_host_cflags_cc -std=c11 ctype.h "__STDC_VERSION__ >= 201112L" || die "Host compiler lacks C11 support"
+    check_host_cflags_cc -std=gnu11 ctype.h "__STDC_VERSION__ >= 201112L" || die "Host compiler lacks C11 support"
 
 check_host_cflags -Wall
 check_host_cflags $host_cflags_speed
@@ -6706,17 +6707,17 @@ check_func  fcntl
 check_func  fork
 check_func  gethrtime
 check_func  getopt
-check_func  getrusage
+#check_func  getrusage
 check_func  gettimeofday
 check_func  isatty
 check_func  mkstemp
-check_func  mmap
+# check_func  mmap
 check_func  mprotect
 # Solaris has nanosleep in -lrt, OpenSolaris no longer needs that
 check_func_headers time.h nanosleep || check_lib nanosleep time.h nanosleep -lrt
 check_func_headers sys/prctl.h prctl
 check_func  sched_getaffinity
-check_func  setrlimit
+#check_func  setrlimit
 check_struct "sys/stat.h" "struct stat" st_mtim.tv_nsec -D_BSD_SOURCE
 check_func  strerror_r
 check_func  sysconf
@@ -6747,7 +6748,7 @@ check_func_headers windows.h SetConsoleCtrlHandler
 check_func_headers windows.h SetDllDirectory
 check_func_headers windows.h Sleep
 check_func_headers windows.h VirtualAlloc
-check_func_headers glob.h glob
+#check_func_headers glob.h glob
 
 if enabled xlib; then
     check_pkg_config xlib_x11 x11 "X11/Xlib.h" XPending ||
@@ -6776,14 +6777,14 @@ check_headers linux/perf_event.h
 check_headers malloc.h
 check_headers mftransform.h
 check_headers net/udplite.h
-check_headers poll.h
+#check_headers poll.h
 check_headers pthread_np.h
 check_headers sys/param.h
 check_headers sys/resource.h
 check_headers sys/select.h
 check_headers sys/time.h
 check_headers sys/un.h
-check_headers termios.h
+#check_headers termios.h
 check_headers unistd.h
 check_headers valgrind/valgrind.h
 check_func_headers VideoToolbox/VTCompressionSession.h VTCompressionSessionPrepareToEncodeFrames -framework VideoToolbox
@@ -6968,10 +6969,9 @@ if ! disabled pthreads && ! enabled w32threads && ! enabled os2threads; then
     fi
 fi
 
-enabled  zlib && { check_pkg_config zlib zlib "zlib.h" zlibVersion ||
-                   check_lib zlib   zlib.h      zlibVersion    -lz; }
-enabled bzlib && check_lib bzlib bzlib.h BZ2_bzlibVersion    -lbz2
-enabled  lzma && check_lib lzma   lzma.h lzma_version_number -llzma
+enabled  zlib
+enabled bzlib
+enabled  lzma
 
 enabled zlib && test_exec $zlib_extralibs <<EOF && enable zlib_gzip
 #include <zlib.h>

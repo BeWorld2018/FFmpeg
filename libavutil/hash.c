@@ -19,6 +19,11 @@
  */
 
 #include <assert.h>
+#ifdef __MORPHOS__
+#ifndef static_assert
+#define static_assert _Static_assert
+#endif
+#endif
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>

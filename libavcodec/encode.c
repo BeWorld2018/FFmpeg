@@ -37,6 +37,12 @@
 #include "frame_thread_encoder.h"
 #include "internal.h"
 
+#ifdef __MORPHOS__
+#ifndef static_assert
+#define static_assert _Static_assert
+#endif
+#endif
+
 typedef struct EncodeContext {
     AVCodecInternal avci;
 

@@ -89,6 +89,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#ifdef __MORPHOS__
+#include <assert.h>
+#endif
 
 #include "config.h"
 #include "libswscale/rgb2rgb.h"
@@ -101,6 +104,9 @@
 #include "yuv2rgb_altivec.h"
 
 #if HAVE_ALTIVEC
+#ifdef __MORPHOS__
+#include <altivec.h>
+#endif
 
 #undef PROFILE_THE_BEAST
 #undef INC_SCALING
@@ -316,6 +322,9 @@ static int altivec_ ## name(SwsInternal *c, const unsigned char *const *in,   \
     vector signed short R1, G1, B1;                                           \
     vector unsigned char R, G, B;                                             \
                                                                               \
+    const vector unsigned char *y1ivP, *y2ivP, *uivP, *vivP;                  \
+    vector unsigned char align_perm;                                          \
+                                                                              \
     vector signed short lCY       = c->CY;                                    \
     vector signed short lOY       = c->OY;                                    \
     vector signed short lCRV      = c->CRV;                                   \
@@ -346,13 +355,26 @@ static int altivec_ ## name(SwsInternal *c, const unsigned char *const *in,   \
         vec_dstst(oute, (0x02000002 | (((w * 3 + 32) / 32) << 16)), 1);       \
                                                                               \
         for (j = 0; j < w / 16; j++) {                                        \
-            y0 = vec_xl(0, y1i);                                              \
+            y1ivP = (const vector unsigned char *) y1i;                       \
+            y2ivP = (const vector unsigned char *) y2i;                       \
+            uivP  = (const vector unsigned char *) ui;                        \
+            vivP  = (const vector unsigned char *) vi;                        \
                                                                               \
-            y1 = vec_xl(0, y2i);                                              \
+            align_perm = vec_lvsl(0, y1i);                                    \
+            y0 = (vector unsigned char)                                       \
+                     vec_perm(y1ivP[0], y1ivP[1], align_perm);                \
                                                                               \
-            u = (vector signed char) vec_xl(0, ui);                           \
+            align_perm = vec_lvsl(0, y2i);                                    \
+            y1 = (vector unsigned char)                                       \
+                     vec_perm(y2ivP[0], y2ivP[1], align_perm);                \
                                                                               \
-            v = (vector signed char) vec_xl(0, vi);                           \
+			align_perm = vec_lvsl(0, ui);                                     \
+            u = (vector signed char)                                          \
+                    vec_perm(uivP[0], uivP[1], align_perm);                   \
+                                                                              \
+ 			align_perm = vec_lvsl(0, vi);                                     \
+            v = (vector signed char)                                          \
+                    vec_perm(vivP[0], vivP[1], align_perm);                   \
                                                                               \
             u = (vector signed char)                                          \
                     vec_sub(u,                                                \
@@ -564,7 +586,7 @@ av_cold SwsFunc ff_yuv2rgb_init_ppc(SwsInternal *c)
  * They are disabled for the moment, until such time as
  * they can be repaired.
  */
-#if 0
+//#if 0
         switch (c->opts.dst_format) {
         case AV_PIX_FMT_RGB24:
             av_log(c, AV_LOG_WARNING, "ALTIVEC: Color Space RGB24\n");
@@ -586,7 +608,7 @@ av_cold SwsFunc ff_yuv2rgb_init_ppc(SwsInternal *c)
             return altivec_yuv2_bgra;
         default: return NULL;
         }
-#endif /* disabled YUV2RGB acceleration */
+//#endif /* disabled YUV2RGB acceleration */
         break;
 
     case AV_PIX_FMT_UYVY422:
@@ -603,10 +625,10 @@ av_cold SwsFunc ff_yuv2rgb_init_ppc(SwsInternal *c)
     return NULL;
 }
 
-av_cold void ff_yuv2rgb_init_tables_ppc(SwsInternal *c,
-                                        const int inv_table[4],
-                                        int brightness,
-                                        int contrast,
+static av_cold void __attribute__ ((noinline)) ff_yuv2rgb_init_tables_altivec(SwsInternal *c,
+                                         const int inv_table[4],
+                                         int brightness,
+                                         int contrast,
                                         int saturation)
 {
 #if HAVE_ALTIVEC
@@ -633,6 +655,18 @@ av_cold void ff_yuv2rgb_init_tables_ppc(SwsInternal *c,
     c->CGU    = vec_splat((vector signed short) buf.vec, 4);
     c->CGV    = vec_splat((vector signed short) buf.vec, 5);
     return;
+#endif /* HAVE_ALTIVEC */
+}
+
+av_cold void ff_yuv2rgb_init_tables_ppc(SwsInternal *c,
+                                        const int inv_table[4],
+                                        int brightness,
+                                        int contrast,
+                                        int saturation)
+{
+#if HAVE_ALTIVEC
+    if (av_get_cpu_flags() & AV_CPU_FLAG_ALTIVEC)
+        ff_yuv2rgb_init_tables_altivec(c, inv_table, brightness, contrast, saturation);
 #endif /* HAVE_ALTIVEC */
 }
 

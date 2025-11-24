@@ -239,7 +239,11 @@ static int modplug_read_header(AVFormatContext *s)
     avpriv_set_pts_info(st, 64, 1, 1000);
     st->duration = ModPlug_GetLength(modplug->f);
     st->codecpar->codec_type  = AVMEDIA_TYPE_AUDIO;
-    st->codecpar->codec_id    = AV_CODEC_ID_PCM_S16LE;
+#ifdef __MORPHOS__
+	st->codecpar->codec_id    = AV_CODEC_ID_PCM_S16BE;
+#else
+	st->codecpar->codec_id    = AV_CODEC_ID_PCM_S16LE;
+#endif
     st->codecpar->ch_layout.nb_channels = settings.mChannels;
     st->codecpar->sample_rate = settings.mFrequency;
 

@@ -24,6 +24,9 @@
 #define AVFORMAT_SWF_H
 
 #include "internal.h"
+#ifdef __MORPHOS__
+#undef TAG_END
+#endif
 
 /* should have a generic way to indicate probable size */
 #define DUMMY_FILE_SIZE   (100 * 1024 * 1024)

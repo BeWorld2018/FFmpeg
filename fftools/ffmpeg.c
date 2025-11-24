@@ -113,6 +113,13 @@ int        nb_filtergraphs;
 
 Decoder     **decoders;
 int        nb_decoders;
+#ifdef __MORPHOS__
+#include <exec/types.h>
+#include "libavutil/ffversion.h"
+unsigned long __stack = 1024*1024*2;
+static const char *version __attribute__((used)) = "$VER: ffmpeg " FFMPEG_VERSION "";
+struct Library *ffmpegSocketBase;
+#endif
 
 #if HAVE_TERMIOS_H
 
@@ -141,6 +148,7 @@ static atomic_int transcode_init_done = 0;
 static volatile int ffmpeg_exited = 0;
 static int64_t copy_ts_first_pts = AV_NOPTS_VALUE;
 
+#ifndef __MORPHOS__
 static void
 sigterm_handler(int sig)
 {
@@ -155,6 +163,7 @@ sigterm_handler(int sig)
         exit(123);
     }
 }
+#endif
 
 #if HAVE_SETCONSOLECTRLHANDLER
 static BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
@@ -234,6 +243,7 @@ void term_init(void)
     }
 #endif
 
+#ifndef __MORPHOS__
     SIGNAL(SIGINT , sigterm_handler); /* Interrupt (ANSI).    */
     SIGNAL(SIGTERM, sigterm_handler); /* Termination (ANSI).  */
 #ifdef SIGXCPU
@@ -241,6 +251,7 @@ void term_init(void)
 #endif
 #ifdef SIGPIPE
     signal(SIGPIPE, SIG_IGN); /* Broken pipe (POSIX). */
+#endif
 #endif
 #if HAVE_SETCONSOLECTRLHANDLER
     SetConsoleCtrlHandler((PHANDLER_ROUTINE) CtrlHandler, TRUE);
@@ -250,6 +261,7 @@ void term_init(void)
 /* read a key without blocking */
 static int read_key(void)
 {
+#ifndef __MORPHOS__
     unsigned char ch;
 #if HAVE_TERMIOS_H
     int n = 1;
@@ -296,6 +308,7 @@ static int read_key(void)
 #    endif
     if(kbhit())
         return(getch());
+#endif
 #endif
     return -1;
 }

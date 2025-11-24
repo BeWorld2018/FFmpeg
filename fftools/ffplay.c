@@ -27,7 +27,9 @@
 #include "config_components.h"
 #include <math.h>
 #include <limits.h>
+#ifndef __MORPHOS__
 #include <signal.h>
+#endif
 #include <stdint.h>
 
 #include "libavutil/avstring.h"
@@ -57,6 +59,13 @@
 #include "cmdutils.h"
 #include "ffplay_renderer.h"
 #include "opt_common.h"
+#ifdef __MORPHOS__
+#include <exec/types.h>
+#include "libavutil/ffversion.h"
+unsigned long __stack = 1024 * 1024 * 2;
+static const char *version __attribute__((used)) = "$VER: ffplay " FFMPEG_VERSION "";
+struct Library *ffmpegSocketBase;
+#endif
 
 const char program_name[] = "ffplay";
 const int program_birth_year = 2003;
@@ -1325,10 +1334,12 @@ static void do_exit(VideoState *is)
     exit(0);
 }
 
+#ifndef __MORPHOS__
 static void sigterm_handler(int sig)
 {
     exit(123);
 }
+#endif
 
 static void set_default_window_size(int width, int height, AVRational sar)
 {
@@ -1355,10 +1366,14 @@ static int video_open(VideoState *is)
 
     SDL_SetWindowSize(window, w, h);
     SDL_SetWindowPosition(window, screen_left, screen_top);
+#ifdef __MORPHOS__
+      if (is_full_screen)
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);  
+#else
     if (is_full_screen)
         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
     SDL_ShowWindow(window);
-
+#endif
     is->width  = w;
     is->height = h;
 
@@ -3295,7 +3310,11 @@ static void stream_cycle_channel(VideoState *is, int codec_type)
 static void toggle_full_screen(VideoState *is)
 {
     is_full_screen = !is_full_screen;
+    #ifdef __MORPHOS__
+    SDL_SetWindowFullscreen(window, is_full_screen ? SDL_WINDOW_FULLSCREEN : 0);
+    #else
     SDL_SetWindowFullscreen(window, is_full_screen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+    #endif
 }
 
 static void toggle_audio_display(VideoState *is)
@@ -3770,8 +3789,10 @@ int main(int argc, char **argv)
 #endif
     avformat_network_init();
 
+#ifndef __MORPHOS__
     signal(SIGINT , sigterm_handler); /* Interrupt (ANSI).    */
     signal(SIGTERM, sigterm_handler); /* Termination (ANSI).  */
+#endif
 
     show_banner(argc, argv, options);
 
@@ -3796,8 +3817,10 @@ int main(int argc, char **argv)
     else {
         /* Try to work around an occasional ALSA buffer underflow issue when the
          * period size is NPOT due to ALSA resampling by forcing the buffer size. */
+ #ifndef __MORPHOS__
         if (!SDL_getenv("SDL_AUDIO_ALSA_SET_BUFFER_SIZE"))
             SDL_setenv("SDL_AUDIO_ALSA_SET_BUFFER_SIZE","1", 1);
+ #endif
     }
     if (display_disable)
         flags &= ~SDL_INIT_VIDEO;
@@ -3811,7 +3834,11 @@ int main(int argc, char **argv)
     SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 
     if (!display_disable) {
+#ifdef __MORPHOS__
+    	int flags = SDL_WINDOW_SHOWN;
+#else
         int flags = SDL_WINDOW_HIDDEN;
+#endif
         if (alwaysontop)
 #if SDL_VERSION_ATLEAST(2,0,5)
             flags |= SDL_WINDOW_ALWAYS_ON_TOP;
@@ -3842,7 +3869,9 @@ int main(int argc, char **argv)
             }
         }
         window = SDL_CreateWindow(program_name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, default_width, default_height, flags);
+#ifndef __MORHPOS__
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+#endif
         if (!window) {
             av_log(NULL, AV_LOG_FATAL, "Failed to create window: %s", SDL_GetError());
             do_exit(NULL);

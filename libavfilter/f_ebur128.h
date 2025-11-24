@@ -23,6 +23,11 @@
 #define AVFILTER_F_EBUR128_H
 
 #include <assert.h>
+#ifdef __MORPHOS__
+#ifndef static_assert
+#define static_assert _Static_assert
+#endif
+#endif
 #include <stddef.h>
 
 typedef struct EBUR128Biquad {

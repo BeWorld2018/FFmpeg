@@ -760,7 +760,9 @@ int assert_file_overwrite(const char *filename)
                 fprintf(stderr,"File '%s' already exists. Overwrite? [y/N] ", filename);
                 fflush(stderr);
                 term_exit();
+#ifndef __MORPHOS__
                 signal(SIGINT, SIG_DFL);
+#endif
                 if (!read_yesno()) {
                     av_log(NULL, AV_LOG_FATAL, "Not overwriting - exiting\n");
                     return AVERROR_EXIT;

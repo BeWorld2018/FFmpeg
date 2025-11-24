@@ -248,6 +248,10 @@ void av_freep(void *arg)
 {
     void *val;
 
+#ifdef __MORPHOS__	
+	if (!arg) return;
+#endif
+
     memcpy(&val, arg, sizeof(val));
     memcpy(arg, &(void *){ NULL }, sizeof(val));
     av_free(val);

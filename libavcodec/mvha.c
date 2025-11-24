@@ -30,7 +30,13 @@
 #include "lossless_videodsp.h"
 #include "zlib_wrapper.h"
 
+#ifdef __MORPHOS__
+#define __MORPHOS_SHAREDLIBS
+#endif
 #include <zlib.h>
+#ifdef __MORPHOS__
+#define Node NodeMOS
+#endif
 
 typedef struct MVHAContext {
     GetBitContext     gb;

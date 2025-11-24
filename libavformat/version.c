@@ -19,7 +19,11 @@
  */
 
 #include <assert.h>
-
+#ifdef __MORPHOS__
+#ifndef static_assert
+#define static_assert _Static_assert
+#endif
+#endif
 #include "config.h"
 
 #include "avformat.h"
