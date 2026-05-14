@@ -101,12 +101,17 @@ static int vlc_common_init(VLC *vlc, int nb_bits, int nb_codes,
     vlc->bits = nb_bits;
     vlc->table_size = 0;
     if (flags & VLC_INIT_USE_STATIC) {
+#ifndef __MORPHOS__
         av_assert0(nb_codes <= LOCALBUF_ELEMS);
+#endif
     } else {
         vlc->table           = NULL;
         vlc->table_allocated = 0;
     }
-    if (nb_codes > LOCALBUF_ELEMS) {
+#ifndef __MORPHOS__
+    if (nb_codes > LOCALBUF_ELEMS)
+#endif
+	{
         *buf = av_malloc_array(nb_codes, sizeof(VLCcode));
         if (!*buf)
             return AVERROR(ENOMEM);
@@ -232,10 +237,12 @@ static int vlc_common_end(VLC *vlc, int nb_bits, int nb_codes, VLCcode *codes,
     int ret = build_table(vlc, nb_bits, nb_codes, codes, flags);
 
     if (flags & VLC_INIT_USE_STATIC) {
+#ifndef __MORPHOS__
         if (vlc->table_size != vlc->table_allocated &&
             !(flags & (VLC_INIT_STATIC_OVERLONG & ~VLC_INIT_USE_STATIC)))
             av_log(NULL, AV_LOG_ERROR, "needed %d had %d\n", vlc->table_size, vlc->table_allocated);
         av_assert0(ret >= 0);
+#endif
     } else {
         if (codes != localbuf)
             av_free(codes);
@@ -253,9 +260,16 @@ int ff_vlc_init_sparse(VLC *vlc, int nb_bits, int nb_codes,
                        const void *symbols, int symbols_wrap, int symbols_size,
                        int flags)
 {
-    VLCcode localbuf[LOCALBUF_ELEMS], *buf = localbuf;
+#ifdef __MORPHOS__
+     VLCcode *buf = NULL;
+#else
+     VLCcode localbuf[LOCALBUF_ELEMS], *buf = localbuf;
+#endif
     int j, ret;
 
+#ifdef __MORPHOS__
+    flags &= ~VLC_INIT_USE_STATIC;
+#endif
     ret = vlc_common_init(vlc, nb_bits, nb_codes, &buf, flags);
     if (ret < 0)
         return ret;
@@ -270,7 +284,7 @@ int ff_vlc_init_sparse(VLC *vlc, int nb_bits, int nb_codes,
             continue;                                                       \
         if (len > 3*nb_bits || len > 32) {                                  \
             av_log(NULL, AV_LOG_ERROR, "Too long VLC (%u) in vlc_init\n", len);\
-            if (buf != localbuf)                                            \
+            if (buf/* != localbuf*/)                                            \
                 av_free(buf);                                               \
             return AVERROR(EINVAL);                                         \
         }                                                                   \
@@ -279,7 +293,7 @@ int ff_vlc_init_sparse(VLC *vlc, int nb_bits, int nb_codes,
         if (buf[j].code >= (1LL<<buf[j].bits)) {                            \
             av_log(NULL, AV_LOG_ERROR, "Invalid code %"PRIx32" for %d in "  \
                    "vlc_init\n", buf[j].code, i);                           \
-            if (buf != localbuf)                                            \
+            if (buf/* != localbuf*/)                                            \
                 av_free(buf);                                               \
             return AVERROR(EINVAL);                                         \
         }                                                                   \
@@ -300,7 +314,11 @@ int ff_vlc_init_sparse(VLC *vlc, int nb_bits, int nb_codes,
     nb_codes = j;
 
     return vlc_common_end(vlc, nb_bits, nb_codes, buf,
+#ifdef __MORPHOS__
+                          flags, NULL);
+#else
                           flags, localbuf);
+#endif
 }
 
 int ff_vlc_init_from_lengths(VLC *vlc, int nb_bits, int nb_codes,
@@ -308,9 +326,17 @@ int ff_vlc_init_from_lengths(VLC *vlc, int nb_bits, int nb_codes,
                              const void *symbols, int symbols_wrap, int symbols_size,
                              int offset, int flags, void *logctx)
 {
+#ifdef __MORPHOS__
+    VLCcode *buf = NULL;
+#else
     VLCcode localbuf[LOCALBUF_ELEMS], *buf = localbuf;
+#endif
     uint64_t code;
     int ret, j, len_max = FFMIN(32, 3 * nb_bits);
+	
+#ifdef __MORPHOS__
+    flags &= ~VLC_INIT_USE_STATIC;
+#endif
 
     ret = vlc_common_init(vlc, nb_bits, nb_codes, &buf, flags);
     if (ret < 0)
@@ -343,9 +369,18 @@ int ff_vlc_init_from_lengths(VLC *vlc, int nb_bits, int nb_codes,
             goto fail;
         }
     }
-    return vlc_common_end(vlc, nb_bits, j, buf, flags, localbuf);
+    return vlc_common_end(vlc, nb_bits, j, buf, flags,
+#ifdef __MORPHOS__
+                          NULL);
+#else
+                          localbuf);
+#endif
 fail:
+#ifdef __MORPHOS__
+    if (buf)
+#else
     if (buf != localbuf)
+#endif
         av_free(buf);
     return AVERROR_INVALIDDATA;
 }

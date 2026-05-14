@@ -2047,7 +2047,14 @@ static av_always_inline void do_8tap_2d_c(uint8_t *_dst, ptrdiff_t dst_stride,
                                           const int16_t *filtery, int avg)
 {
     int tmp_h = h + 7;
+#ifdef __MORPHOS__
+	pixel *tmp = av_malloc(64 * 71 * sizeof(pixel));
+	if (!tmp)
+        return;
+	pixel *tmp_ptr = tmp;
+#else
     pixel tmp[64 * 71], *tmp_ptr = tmp;
+#endif
     pixel *dst = (pixel *) _dst;
     const pixel *src = (const pixel *) _src;
 
@@ -2078,6 +2085,9 @@ static av_always_inline void do_8tap_2d_c(uint8_t *_dst, ptrdiff_t dst_stride,
         tmp_ptr += 64;
         dst += dst_stride;
     } while (--h);
+#ifdef __MORPHOS__
+	av_free(tmp);
+#endif
 }
 
 #define filter_8tap_2d_fn(opn, opa) \
@@ -2161,7 +2171,14 @@ static av_always_inline void do_bilin_2d_c(uint8_t *_dst, ptrdiff_t dst_stride,
                                            const uint8_t *_src, ptrdiff_t src_stride,
                                            int w, int h, int mx, int my, int avg)
 {
+#ifdef __MORPHOS__
+	pixel *tmp = av_malloc(64 * 65 * sizeof(pixel));
+	if (!tmp)
+        return; 
+    pixel *tmp_ptr = tmp;
+#else
     pixel tmp[64 * 65], *tmp_ptr = tmp;
+#endif
     int tmp_h = h + 1;
     pixel *dst = (pixel *) _dst;
     const pixel *src = (const pixel *) _src;
@@ -2192,6 +2209,9 @@ static av_always_inline void do_bilin_2d_c(uint8_t *_dst, ptrdiff_t dst_stride,
         tmp_ptr += 64;
         dst += dst_stride;
     } while (--h);
+#ifdef __MORPHOS__
+	 av_free(tmp);
+#endif
 }
 
 #define bilin_2d_fn(opn, opa) \
@@ -2335,7 +2355,14 @@ static av_always_inline void do_scaled_8tap_c(uint8_t *_dst, ptrdiff_t dst_strid
                                               const int16_t (*filters)[8])
 {
     int tmp_h = (((h - 1) * dy + my) >> 4) + 8;
+#ifdef __MORPHOS__
+	pixel *tmp = av_malloc(64 * 135 * sizeof(pixel));
+	if (!tmp)
+		return;
+    pixel *tmp_ptr = tmp;
+#else
     pixel tmp[64 * 135], *tmp_ptr = tmp;
+#endif
     pixel *dst = (pixel *) _dst;
     const pixel *src = (const pixel *) _src;
 
@@ -2374,6 +2401,9 @@ static av_always_inline void do_scaled_8tap_c(uint8_t *_dst, ptrdiff_t dst_strid
         my &= 0xf;
         dst += dst_stride;
     } while (--h);
+#ifdef __MORPHOS__
+	av_free(tmp);
+#endif
 }
 
 #define scaled_filter_8tap_fn(opn, opa) \
@@ -2409,7 +2439,14 @@ static av_always_inline void do_scaled_bilin_c(uint8_t *_dst, ptrdiff_t dst_stri
                                                int w, int h, int mx, int my,
                                                int dx, int dy, int avg)
 {
+#ifdef __MORPHOS__
+	pixel *tmp = av_malloc(64 * 129 * sizeof(pixel));
+	if (!tmp)
+			return;
+    pixel *tmp_ptr = tmp;
+#else
     pixel tmp[64 * 129], *tmp_ptr = tmp;
+#endif
     int tmp_h = (((h - 1) * dy + my) >> 4) + 2;
     pixel *dst = (pixel *) _dst;
     const pixel *src = (const pixel *) _src;
@@ -2447,6 +2484,9 @@ static av_always_inline void do_scaled_bilin_c(uint8_t *_dst, ptrdiff_t dst_stri
         my &= 0xf;
         dst += dst_stride;
     } while (--h);
+#ifdef __MORPHOS__
+	av_free(tmp);
+#endif
 }
 
 #define scaled_bilin_fn(opn, opa) \

@@ -31,6 +31,9 @@
 #include "zlib_wrapper.h"
 
 #include <zlib.h>
+#ifdef __MORPHOS__
+#define Node NodeMOS
+#endif
 
 typedef struct MVHAContext {
     GetBitContext     gb;

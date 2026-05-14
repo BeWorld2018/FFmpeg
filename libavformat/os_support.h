@@ -30,6 +30,9 @@
 #include "config.h"
 
 #include <sys/stat.h>
+#ifdef __MORPHOS__
+#include <string.h>
+#endif 
 
 #ifdef _WIN32
 #if HAVE_DIRECT_H
@@ -97,6 +100,13 @@
 
 static inline int is_dos_path(const char *path)
 {
+#if defined(__MORPHOS__)
+	/* Not strictly a "DOS PATH" but the point is the same */
+	if(!strstr(path,"://") && !strstr(path,":\\"))
+	{
+		return 1;
+	}
+#endif
 #if HAVE_DOS_PATHS
     if (path[0] && path[1] == ':')
         return 1;

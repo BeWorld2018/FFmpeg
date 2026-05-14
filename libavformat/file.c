@@ -180,8 +180,8 @@ static int file_check(URLContext *h, int mask)
         if (access(filename, W_OK) >= 0)
             ret |= AVIO_FLAG_WRITE;
 #else
-    struct stat st;
-    ret = stat(filename, &st);
+    struct stat64 st;
+    ret = stat64(filename, &st);
     if (ret < 0)
         return AVERROR(errno);
 
@@ -229,12 +229,12 @@ static int64_t file_seek(URLContext *h, int64_t pos, int whence)
     int64_t ret;
 
     if (whence == AVSEEK_SIZE) {
-        struct stat st;
-        ret = fstat(c->fd, &st);
+        struct stat64 st;
+        ret = fstat64(c->fd, &st);
         return ret < 0 ? AVERROR(errno) : (S_ISFIFO(st.st_mode) ? 0 : st.st_size);
     }
 
-    ret = lseek(c->fd, pos, whence);
+    ret = lseek64(c->fd, pos, whence);
 
     return ret < 0 ? AVERROR(errno) : ret;
 }
@@ -282,7 +282,7 @@ static int file_open(URLContext *h, const char *filename, int flags)
     FileContext *c = h->priv_data;
     int access;
     int fd;
-    struct stat st;
+    struct stat64 st;
 
     av_strstart(filename, "file:", &filename);
 
@@ -305,7 +305,7 @@ static int file_open(URLContext *h, const char *filename, int flags)
         return AVERROR(errno);
     c->fd = fd;
 
-    h->is_streamed = !fstat(fd, &st) && S_ISFIFO(st.st_mode);
+    h->is_streamed = !fstat64(fd, &st) && S_ISFIFO(st.st_mode);
 
     /* Buffer writes more than the default 32k to improve throughput especially
      * with networked file systems */
@@ -354,8 +354,8 @@ static int file_read_dir(URLContext *h, AVIODirEntry **next)
 
     fullpath = av_append_path_component(h->filename, dir->d_name);
     if (fullpath) {
-        struct stat st;
-        if (!lstat(fullpath, &st)) {
+        struct stat64 st;
+        if (!lstat64(fullpath, &st)) {
             if (S_ISDIR(st.st_mode))
                 (*next)->type = AVIO_ENTRY_DIRECTORY;
             else if (S_ISFIFO(st.st_mode))
@@ -472,7 +472,7 @@ const URLProtocol ff_pipe_protocol = {
 static int fd_open(URLContext *h, const char *filename, int flags)
 {
     FileContext *c = h->priv_data;
-    struct stat st;
+    struct stat64 st;
 
     if (strcmp(filename, "fd:") != 0) {
         av_log(h, AV_LOG_ERROR, "Doesn't support pass file descriptor via URL,"
@@ -487,7 +487,7 @@ static int fd_open(URLContext *h, const char *filename, int flags)
             c->fd = 0;
         }
     }
-    if (fstat(c->fd, &st) < 0)
+    if (fstat64(c->fd, &st) < 0)
         return AVERROR(errno);
     h->is_streamed = !(S_ISREG(st.st_mode) || S_ISBLK(st.st_mode));
     c->fd = fd_dup(h, c->fd);

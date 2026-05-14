@@ -59,6 +59,13 @@
 
 #include "cmdutils.h"
 #include "opt_common.h"
+#ifdef __MORPHOS__
+#include <exec/types.h>
+#include "libavutil/ffversion.h"
+unsigned long __stack = 1024 * 1024 * 2;
+static const char *version __attribute__((used)) = "$VER: ffplay " FFMPEG_VERSION "";
+struct Library *ffmpegSocketBase;
+#endif
 
 const char program_name[] = "ffplay";
 const int program_birth_year = 2003;
@@ -1332,7 +1339,7 @@ static int video_open(VideoState *is)
     SDL_SetWindowSize(window, w, h);
     SDL_SetWindowPosition(window, screen_left, screen_top);
     if (is_full_screen)
-        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
     SDL_ShowWindow(window);
 
     is->width  = w;
@@ -3209,7 +3216,7 @@ static void stream_cycle_channel(VideoState *is, int codec_type)
 static void toggle_full_screen(VideoState *is)
 {
     is_full_screen = !is_full_screen;
-    SDL_SetWindowFullscreen(window, is_full_screen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+    SDL_SetWindowFullscreen(window, is_full_screen ? SDL_WINDOW_FULLSCREEN : 0);
 }
 
 static void toggle_audio_display(VideoState *is)
@@ -3698,8 +3705,10 @@ int main(int argc, char **argv)
     else {
         /* Try to work around an occasional ALSA buffer underflow issue when the
          * period size is NPOT due to ALSA resampling by forcing the buffer size. */
+ #ifndef __MORPHOS__
         if (!SDL_getenv("SDL_AUDIO_ALSA_SET_BUFFER_SIZE"))
             SDL_setenv("SDL_AUDIO_ALSA_SET_BUFFER_SIZE","1", 1);
+ #endif
     }
     if (display_disable)
         flags &= ~SDL_INIT_VIDEO;
@@ -3713,7 +3722,7 @@ int main(int argc, char **argv)
     SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 
     if (!display_disable) {
-        int flags = SDL_WINDOW_HIDDEN;
+        int flags = SDL_WINDOW_SHOWN;
         if (alwaysontop)
 #if SDL_VERSION_ATLEAST(2,0,5)
             flags |= SDL_WINDOW_ALWAYS_ON_TOP;

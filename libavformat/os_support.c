@@ -39,6 +39,10 @@
 #endif /* HAVE_SYS_SELECT_H */
 #endif /* !HAVE_POLL_H */
 
+#ifdef __MORPHOS__
+#include <sys/filio.h>
+#endif
+
 #include "network.h"
 
 #if !HAVE_GETADDRINFO
@@ -209,6 +213,13 @@ const char *ff_gai_strerror(int ecode)
 
 int ff_socket_nonblock(int socket, int enable)
 {
+#ifdef __MORPHOS__
+	if (!ffmpegSocketBase) {
+		//kprintf("%s - ERROR!! ffmpegSocketBase is NULL!\n", __FUNCTION__);
+		errno = EIO;
+		return -1;
+	}
+#endif
 #if HAVE_WINSOCK2_H
     u_long param = enable;
     return ioctlsocket(socket, FIONBIO, &param);
@@ -223,6 +234,13 @@ int ff_socket_nonblock(int socket, int enable)
 #if !HAVE_POLL_H
 int ff_poll(struct pollfd *fds, nfds_t numfds, int timeout)
 {
+#ifdef __MORPHOS__
+	if (!ffmpegSocketBase) {
+		//kprintf("%s - ERROR!! ffmpegSocketBase is NULL!\n", __FUNCTION__);
+		errno = EIO;
+		return -1;
+	}
+#endif		
     fd_set read_set;
     fd_set write_set;
     fd_set exception_set;

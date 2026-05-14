@@ -464,7 +464,14 @@ FF_ENABLE_DEPRECATION_WARNINGS
         consumed = pkt->size;
 
     if (!ret)
+#ifdef __MORPHOS__
+	{
+		if (!frame->buf[0])
+			return AVERROR(EINVAL);
+	}
+#else	
         av_assert0(frame->buf[0]);
+#endif
     if (ret == AVERROR(EAGAIN))
         ret = 0;
 
@@ -621,7 +628,12 @@ static int decode_receive_frame_internal(AVCodecContext *avctx, AVFrame *frame)
     const FFCodec *const codec = ffcodec(avctx->codec);
     int ret, ok;
 
+#ifdef __MORPHOS__
+    if (frame->buf[0])
+		return AVERROR(EINVAL);
+#else
     av_assert0(!frame->buf[0]);
+#endif
 
     if (codec->cb_type == FF_CODEC_CB_TYPE_RECEIVE_FRAME) {
         ret = codec->cb.receive_frame(avctx, frame);

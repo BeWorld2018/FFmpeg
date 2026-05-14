@@ -129,6 +129,14 @@ int         nb_output_files   = 0;
 FilterGraph **filtergraphs;
 int        nb_filtergraphs;
 
+#ifdef __MORPHOS__
+#include <exec/types.h>
+#include "libavutil/ffversion.h"
+unsigned long __stack = 1024 * 1024 * 2;
+static const char *version __attribute__((used)) = "$VER: ffmpeg " FFMPEG_VERSION "";
+struct Library *ffmpegSocketBase;
+#endif
+
 #if HAVE_TERMIOS_H
 
 /* init terminal so that we can grab keys */

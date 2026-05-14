@@ -189,7 +189,12 @@ static int alloc_picture(H264Context *h, H264Picture *pic)
 {
     int i, ret = 0;
 
+#ifdef __MORPHOS__
+    if (!h || !pic || !pic->f || pic->f->data[0])
+        goto fail;
+#else
     av_assert0(!pic->f->data[0]);
+#endif
 
     pic->tf.f = pic->f;
     ret = ff_thread_get_ext_buffer(h->avctx, &pic->tf,
@@ -2066,15 +2071,27 @@ int ff_h264_queue_decode_slice(H264Context *h, const H2645NAL *nal)
             // this slice starts a new field
             // first decode any pending queued slices
             if (h->nb_slice_ctx_queued) {
+#ifndef __MORPHOS__
                 H264SliceContext tmp_ctx;
-
+#endif
                 ret = ff_h264_execute_decode_slices(h);
                 if (ret < 0 && (h->avctx->err_recognition & AV_EF_EXPLODE))
                     return ret;
-
+#ifndef __MORPHOS__
                 memcpy(&tmp_ctx, h->slice_ctx, sizeof(tmp_ctx));
                 memcpy(h->slice_ctx, sl, sizeof(tmp_ctx));
                 memcpy(sl, &tmp_ctx, sizeof(tmp_ctx));
+#else
+				// HSMOD: nice trick to avoid excessive stack usage
+                if (h->slice_ctx != sl) {
+                    for (int i = 0; i < sizeof(H264SliceContext) / sizeof(uint32_t); i++) {
+                        ((uint32_t *) h->slice_ctx)[i] ^= ((uint32_t *) sl)[i];
+                        ((uint32_t *) sl)[i] ^= ((uint32_t *) h->slice_ctx)[i];
+                        ((uint32_t *) h->slice_ctx)[i] ^= ((uint32_t *) sl)[i];
+                    }
+                }
+
+#endif
                 sl = h->slice_ctx;
             }
 
@@ -2547,9 +2564,9 @@ static int decode_slice(struct AVCodecContext *avctx, void *arg)
         return ret;
 
     sl->mb_skip_run = -1;
-
+#ifndef __MORPHOS__
     av_assert0(h->block_offset[15] == (4 * ((scan8[15] - scan8[0]) & 7) << h->pixel_shift) + 4 * sl->linesize * ((scan8[15] - scan8[0]) >> 3));
-
+#endif
     if (h->postpone_filter)
         sl->deblocking_filter = 0;
 
@@ -2756,7 +2773,12 @@ int ff_h264_execute_decode_slices(H264Context *h)
     if (h->avctx->hwaccel || context_count < 1)
         return 0;
 
+#ifdef __MORPHOS__
+    if (!(context_count && h->slice_ctx[context_count - 1].mb_y < h->mb_height))
+       return 0;
+#else
     av_assert0(context_count && h->slice_ctx[context_count - 1].mb_y < h->mb_height);
+#endif
 
     if (context_count == 1) {
 

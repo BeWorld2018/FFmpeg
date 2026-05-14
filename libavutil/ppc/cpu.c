@@ -31,6 +31,12 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <machine/cpu.h>
+#elif __MORPHOS__
+#include <stdio.h>
+#include <exec/exec.h>
+#include <exec/system.h>
+#include <proto/exec.h>
+int altivec_disabled;
 #elif defined(__AMIGAOS4__)
 #include <exec/exec.h>
 #include <interfaces/exec.h>
@@ -56,6 +62,15 @@ int ff_get_cpu_flags_ppc(void)
     if (result == VECTORTYPE_ALTIVEC)
         return AV_CPU_FLAG_ALTIVEC;
     return 0;
+#elif defined(__MORPHOS__)
+	ULONG result = 0;
+	if (altivec_disabled || 
+		!NewGetSystemAttrs(&result, sizeof(result), SYSTEMINFOTYPE_PPC_ALTIVEC, TAG_DONE) ||
+		!LIB_MINVER(&SysBase->LibNode, 50, 61))
+	{
+		result = 0; 
+    }
+	return result != 0 ? AV_CPU_FLAG_ALTIVEC : 0;
 #elif defined(__APPLE__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #if defined(__NetBSD__) || defined(__OpenBSD__)
     int sels[2] = {CTL_MACHDEP, CPU_ALTIVEC};
