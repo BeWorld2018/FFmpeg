@@ -365,7 +365,7 @@ fail:
     ff_id3v2_free_extra_meta(&id3v2_extra_meta);
     av_dict_free(&tmp);
     if (s->pb && !(s->flags & AVFMT_FLAG_CUSTOM_IO))
-        avio_closep(&s->pb);
+        ff_format_io_close(s, &s->pb);
     avformat_free_context(s);
     *ps = NULL;
     return ret;
@@ -390,11 +390,10 @@ void avformat_close_input(AVFormatContext **ps)
         if (s->iformat->read_close)
             s->iformat->read_close(s);
 
+    ff_format_io_close(s, &pb);
     avformat_free_context(s);
 
     *ps = NULL;
-
-    avio_close(pb);
 }
 
 static void force_codec_ids(AVFormatContext *s, AVStream *st)

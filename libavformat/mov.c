@@ -1384,6 +1384,8 @@ static int64_t get_frag_time(AVFormatContext *s, AVStream *dst_st,
     // to fragments that referenced this stream in the sidx
     if (sc->has_sidx) {
         frag_stream_info = get_frag_stream_info(frag_index, index, dst_st->id);
+        if (!frag_stream_info)
+            return AV_NOPTS_VALUE;
         if (frag_stream_info->sidx_pts != AV_NOPTS_VALUE)
             return frag_stream_info->sidx_pts;
         if (frag_stream_info->first_tfra_pts != AV_NOPTS_VALUE)
@@ -6435,7 +6437,7 @@ static int mov_read_free(MOVContext *c, AVIOContext *pb, MOVAtom atom)
     if (atom.size < 8)
         return 0;
 
-    ret = avio_read(pb, content, FFMIN(sizeof(content), atom.size));
+    ret = ffio_read_size(pb, content, FFMIN(sizeof(content), atom.size));
     if (ret < 0)
         return ret;
 

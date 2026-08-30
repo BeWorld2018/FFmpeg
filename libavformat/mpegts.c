@@ -172,6 +172,7 @@ struct MpegTSContext {
     /* scan context */
     /** structure to keep track of Program->pids mapping */
     unsigned int nb_prg;
+    unsigned int prg_size; ///< allocated size of prg in bytes
     struct Program *prg;
 
     int8_t crc_validity[NB_PID_MAX];
@@ -313,17 +314,26 @@ static void clear_programs(MpegTSContext *ts)
 {
     av_freep(&ts->prg);
     ts->nb_prg = 0;
+    ts->prg_size = 0;
 }
 
 static struct Program * add_program(MpegTSContext *ts, unsigned int programid)
 {
     struct Program *p = get_program(ts, programid);
+    struct Program *tmp = NULL;
+    size_t new_prg_size;
     if (p)
         return p;
-    if (av_reallocp_array(&ts->prg, ts->nb_prg + 1, sizeof(*ts->prg)) < 0) {
-        ts->nb_prg = 0;
+
+    if (!av_size_mult(ts->nb_prg + 1,  sizeof(*ts->prg), &new_prg_size))
+        tmp = av_fast_realloc(ts->prg, &ts->prg_size,new_prg_size);
+    if (!tmp) {
+        av_freep(&ts->prg);
+        ts->nb_prg   = 0;
+        ts->prg_size = 0;
         return NULL;
     }
+    ts->prg = tmp;
     p = &ts->prg[ts->nb_prg];
     p->id = programid;
     clear_program(p);
@@ -2192,7 +2202,7 @@ int ff_parse_mpeg2_descriptor(AVFormatContext *fc, AVStream *st, int stream_type
             uint32_t buf;
             AVDOVIDecoderConfigurationRecord *dovi;
             size_t dovi_size;
-            int dependency_pid;
+            int dependency_pid = -1; // Unset
 
             if (desc_end - *pp < 4) // (8 + 8 + 7 + 6 + 1 + 1 + 1) / 8
                 return AVERROR_INVALIDDATA;

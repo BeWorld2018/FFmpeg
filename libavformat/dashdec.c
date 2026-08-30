@@ -445,7 +445,7 @@ static int open_url(AVFormatContext *s, AVIOContext **pb, const char *url,
     av_freep(pb);
     av_dict_copy(&tmp, *opts, 0);
     av_dict_copy(&tmp, opts2, 0);
-    ret = ffio_open_whitelist(pb, url, AVIO_FLAG_READ, c->interrupt_callback, &tmp, s->protocol_whitelist, s->protocol_blacklist);
+    ret = s->io_open(s, pb, url, AVIO_FLAG_READ, &tmp);
     if (ret >= 0) {
         // update cookies on http response with setcookies.
         char *new_cookies = NULL;
@@ -1241,7 +1241,7 @@ static int parse_manifest(AVFormatContext *s, const char *url, AVIOContext *in)
         close_in = 1;
 
         av_dict_copy(&opts, c->avio_opts, 0);
-        ret = ffio_open_whitelist(&in, url, AVIO_FLAG_READ, c->interrupt_callback, &opts, s->protocol_whitelist, s->protocol_blacklist);
+        ret = s->io_open(s, &in, url, AVIO_FLAG_READ, &opts);
         av_dict_free(&opts);
         if (ret < 0)
             return ret;
@@ -1384,7 +1384,7 @@ cleanup:
 
     av_bprint_finalize(&buf, NULL);
     if (close_in) {
-        avio_close(in);
+        ff_format_io_close(s, &in);
     }
     return ret;
 }
@@ -2068,6 +2068,8 @@ static int dash_read_header(AVFormatContext *s)
 
         if (ret)
             return ret;
+        if (rep->ctx->nb_streams == 0)
+            return AVERROR_PATCHWELCOME;
         rep->stream_index = stream_index;
         ++stream_index;
     }
@@ -2086,6 +2088,8 @@ static int dash_read_header(AVFormatContext *s)
 
         if (ret)
             return ret;
+        if (rep->ctx->nb_streams == 0)
+            return AVERROR_PATCHWELCOME;
         rep->stream_index = stream_index;
         ++stream_index;
     }
@@ -2104,6 +2108,8 @@ static int dash_read_header(AVFormatContext *s)
 
         if (ret)
             return ret;
+        if (rep->ctx->nb_streams == 0)
+            return AVERROR_PATCHWELCOME;
         rep->stream_index = stream_index;
         ++stream_index;
     }

@@ -1128,7 +1128,7 @@ static int FUNC(sps)(CodedBitstreamContext *ctx, RWContext *rw,
     tmp_height_val = AV_CEIL_RSHIFT(current->sps_pic_height_max_in_luma_samples,
                     ctb_log2_size_y);
 
-    flag(sps_subpic_info_present_flag);
+    u(1, sps_subpic_info_present_flag, 0, !current->sps_res_change_in_clvs_allowed_flag);
     if (current->sps_subpic_info_present_flag) {
         ue(sps_num_subpics_minus1, 0, VVC_MAX_SLICES - 1);
         if (current->sps_num_subpics_minus1 > 0) {
@@ -1995,7 +1995,7 @@ static int FUNC(pps) (CodedBitstreamContext *ctx, RWContext *rw,
                         for (j = 0; j < current->pps_num_exp_slices_in_tile[i];
                              j++) {
                             ues(pps_exp_slice_height_in_ctus_minus1[i][j], 0,
-                                current->row_height_val[tile_y] - 1, 2,
+                                remaining_height_in_ctbs_y - (current->pps_num_exp_slices_in_tile[i] - j), 2,
                                 i, j);
                             slice_height_in_ctus =
                                 current->
@@ -3105,7 +3105,7 @@ static int FUNC(slice_header) (CodedBitstreamContext *ctx, RWContext *rw,
 
     if (!pps->pps_rect_slice_flag &&
         pps->num_tiles_in_pic - current->sh_slice_address > 1)
-        ue(sh_num_tiles_in_slice_minus1, 0, pps->num_tiles_in_pic - 1);
+        ue(sh_num_tiles_in_slice_minus1, 0, pps->num_tiles_in_pic - 1 - current->sh_slice_address);
     else
         infer(sh_num_tiles_in_slice_minus1, 0);
 
